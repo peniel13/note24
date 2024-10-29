@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Détails de la Période: {{ periode.nom }}</h1>
+    <h2>Élève: {{ eleve.nom }}</h2>
+
+    <h3>Notations</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Matière</th>
+                <th>Note Attendue</th>
+                <th>Note Obtenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notation in notations %}
+                <tr>
+                    <td>{{ notation.matiere.nom }}</td>
+                    <td>{{ notation.note_attendue }}</td>
+                    <td>{{ notation.note_obtenue }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Aucune notation disponible</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>Total des Notes Attenues: {{ total_attendu }}</p>
+    <p>Total des Notes Obtenues: {{ total_obtenu }}</p>
+
+    <a href="{% url 'details_eleve' eleve.id %}">Retour à l'élève</a>
+    <a href="{% url 'generer_excel' periode.id %}" class="btn btn-primary">Télécharger le rapport Excel</a>
+{% endblock content %}

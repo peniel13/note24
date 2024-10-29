@@ -1,0 +1,85 @@
+{% comment %} <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails de l'Élève - {{ eleve.nom }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Détails de l'Élève: {{ eleve.nom }}</h1>
+
+        <h2>Périodes</h2>
+        <div class="row">
+            {% for periode in periodes %}
+                <div class="col-md-4">
+                    <div class="card" onclick="window.location.href='{% url 'details_periode' eleve.id periode.id %}'">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ periode.nom }}</h5>
+                            {% if periode in notations_par_periode %}
+                               
+                            {% else %}
+                                <p>Aucune notation disponible</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <a href="{% url 'details_classe' eleve.classe.id %}">Retour à la classe</a>
+    </div>
+</body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails de l'Élève - {{ eleve.nom }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Détails de l'Élève: {{ eleve.nom }}</h1>
+
+        <h2>Tableau Élève</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Matières</th>
+                    {% for periode in periodes %}
+                        <th>{{ periode.nom }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for matiere, notations in notations_par_matiere.items %}
+                    <tr>
+                        <td>{{ matiere.nom }}</td>
+                        {% for periode in periodes %}
+                            <td>
+                                {% if periode in notations %}
+                                    {% comment %} Note Attendue: {{ notations[periode].note_attendue }}<br>
+                                    Note Obtenue: {{ notations[periode].note_obtenue }} {% endcomment %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'details_classe' eleve.classe.id %}">Retour à la classe</a>
+    </div>
+</body>
+</html>
+

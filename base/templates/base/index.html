@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>La notation des élèves en ligne</h1>
+        <p>
+            Exclusivement pour les profs de l'école. Les profs seront appelés à se connecter et seront ensuite vérifiés pour commencer à noter les élèves.
+        </p>
+    </div>
+</section>
+
+
+{% block styles %}
+<style>
+    .hero {
+        background-image: url("{% static 'img/slid.jpg' %}"); /* Chemin de l'image */
+        background-size: cover;
+        background-position: center;
+        height: 60vh; /* Ajustez la hauteur selon vos besoins */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+    .hero-overlay {
+        background-color: rgba(0, 0, 0, 0.5); /* Couche sombre pour améliorer la lisibilité */
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .hero-content {
+        position: relative; /* Pour que le texte soit au-dessus de l'overlay */
+        z-index: 1;
+    }
+    h1 {
+        font-size: 2.5rem; /* Taille du titre */
+        margin-bottom: 1rem;
+    }
+    p {
+        font-size: 1.25rem; /* Taille du texte */
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .about {
+        display: flex;
+        max-width: 1200px; /* Ajustez selon vos besoins */
+        margin: 0 auto;
+    }
+    .about-text {
+        padding: 2rem;
+    }
+    .about-image img {
+        max-width: 100%; /* S'assure que l'image ne déborde pas */
+        height: auto; /* Conserve le ratio de l'image */
+    }
+</style>
+{% endblock styles %}
+{% endblock content %}
+

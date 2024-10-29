@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Détails de la Matière: {{ matiere.nom }} (Classe: {{ matiere.classe.nom }})</h1>
+
+<h2>Élèves et Notes par Période</h2>
+
+{% for periode, notes in periodes_notes.items %}
+    <h3>Période: {{ periode.nom }}</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Élève</th>
+                <th>Note Attendue</th>
+                <th>Note Obtenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+                <tr>
+                    <td>{{ note.eleve.nom }}</td>
+                    <td>{{ note.note_attendue }}</td>
+                    <td>{{ note.note_obtenue }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Aucune notation trouvée pour cette période.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% empty %}
+    <p>Aucune notation trouvée pour cette matière.</p>
+{% endfor %}
+
+<a href="{% url 'details_classe' matiere.classe.id %}">Retour aux détails de la classe</a>
+
+{% endblock content %}

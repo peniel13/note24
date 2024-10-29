@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Détails de la Classe: {{ classe.nom }}</h1>
+    
+    <h2>Élèves</h2>
+    <ul>
+        {% for eleve in eleves %}
+            <li>
+                <a href="{% url 'details_eleve' eleve.id %}">{{ eleve.nom }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Matières</h2>
+    <ul>
+        {% for matiere in matieres %}
+        <li>
+            <a href="{% url 'details_matiere' matiere.id %}">{{ matiere.nom }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+
+    <a href="{% url 'liste_classes' %}">Retour à la liste des classes</a>
+
+{% endblock content %}
