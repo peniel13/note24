@@ -14,7 +14,12 @@
         </div>
     {% endfor %}
 </div>
+</div>
 
+<!-- Lien vers la page des situations de l'élève -->
+<div class="situations-link">
+    <h3><a href="{% url 'situations_eleve' eleve_id=eleve.id %}">Voir la situation complète de l'élève</a></h3>
+</div>
 {% endblock %}
 
 {% block styles %}

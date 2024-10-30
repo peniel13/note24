@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+
+{% block content %}
+<h1>Situations de l'Élève</h1>
+
+<header>
+    <h1>Classe : {{ eleve.classe }}</h1>
+    <h2>Élève : {{ eleve.nom }} {{ eleve.prenom }}</h2>
+</header>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Matières</th>
+            {% for periode in periodes %}
+                <th colspan="2">{{ periode.nom }}</th>
+            {% endfor %}
+            <th colspan="2">Total</th>
+        </tr>
+        <tr>
+            <th></th>
+            {% for periode in periodes %}
+                <th>Note Obtenue</th>
+                <th>Note Attendue</th>
+            {% endfor %}
+            <th>Total Obtenu</th>
+            <th>Total Attendu</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for matiere in matieres %}
+            <tr>
+                <td>{{ matiere.nom }}</td>
+                {% for periode in periodes %}
+                    <td>
+                        {% with notation=notations_par_matiere|get_item:matiere|get_item:periode %}
+                            {% if notation %}
+                                {{ notation.note_obtenue }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with notation=notations_par_matiere|get_item:matiere|get_item:periode %}
+                            {% if notation %}
+                                {{ notation.note_attendue }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                {% endfor %}
+                <td>{{ notations_par_matiere|get_item:matiere|sum_by_key:"note_obtenue" }}</td>
+                <td>{{ notations_par_matiere|get_item:matiere|sum_by_key:"note_attendue" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td><strong>Total par période</strong></td>
+            {% for periode in periodes %}
+                {% with total_obtenu=total_periode_obtenu|get_item:periode %}
+                    <td><strong>{{ total_obtenu }}</strong></td>
+                {% endwith %}
+                {% with total_attendu=total_periode_attendu|get_item:periode %}
+                    <td><strong>{{ total_attendu }}</strong></td>
+                {% endwith %}
+            {% endfor %}
+            <td><strong>{{ total_obtenu }}</strong></td>
+            <td><strong>{{ total_attendu }}</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Pourcentage Obtenu</strong></td>
+            {% for periode in periodes %}
+                {% with pourcentage=pourcentage_periode|get_item:periode %}
+                    <td><strong>{{ pourcentage|floatformat:2 }}%</strong></td>
+                {% endwith %}
+                <td></td>
+            {% endfor %}
+            <td></td>
+            <td></td>
+        </tr>
+    </tfoot>
+</table>
+
+<footer>
+    <h3>Total des notes :</h3>
+    <p>Note Obtenue : {{ total_obtenu }}</p>
+    <p>Note Attendue : {{ total_attendu }}</p>
+</footer>
+<a href="{% url 'generer_excel2' eleve.id %}" class="btn btn-primary">Télécharger le rapport Excel</a>
+
+{% endblock %}

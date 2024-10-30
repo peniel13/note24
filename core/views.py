@@ -195,13 +195,18 @@ def details_periode(request, eleve_id, periode_id):
     total_attendu = notations.aggregate(Sum('note_attendue'))['note_attendue__sum'] or 0
     total_obtenu = notations.aggregate(Sum('note_obtenue'))['note_obtenue__sum'] or 0
 
+    # Calcul du pourcentage
+    pourcentage = (total_obtenu / total_attendu * 100) if total_attendu > 0 else 0
+
     return render(request, 'core/details_periode.html', {
         'eleve': eleve,
         'periode': periode,
         'notations': notations,
         'total_attendu': total_attendu,
         'total_obtenu': total_obtenu,
+        'pourcentage': pourcentage,
     })
+
 
 
 import openpyxl
@@ -273,5 +278,124 @@ def generer_excel(request, periode_id):
     # Création de la réponse HTTP pour le fichier
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename="rapport_{periode.nom}.xlsx"'
+    
+    return response
+
+def situations_eleve(request, eleve_id):
+    eleve = get_object_or_404(Eleve, id=eleve_id)
+    periodes = Periode.objects.all()
+    matieres = Matiere.objects.filter(classe=eleve.classe)
+
+    notations_par_matiere = {
+        matiere: {periode: Notation.objects.filter(eleve=eleve, matiere=matiere, periode=periode).first() for periode in periodes}
+        for matiere in matieres
+    }
+
+    total_obtenu = 0
+    total_attendu = 0
+
+    total_periode_obtenu = {periode: 0 for periode in periodes}
+    total_periode_attendu = {periode: 0 for periode in periodes}
+
+    for matiere, notations in notations_par_matiere.items():
+        for periode, notation in notations.items():
+            if notation:
+                total_obtenu += notation.note_obtenue
+                total_attendu += notation.note_attendue
+                total_periode_obtenu[periode] += notation.note_obtenue
+                total_periode_attendu[periode] += notation.note_attendue
+
+    # Calculer le pourcentage par période
+    pourcentage_periode = {}
+    for periode in periodes:
+        if total_periode_attendu[periode] > 0:
+            pourcentage_periode[periode] = (total_periode_obtenu[periode] / total_periode_attendu[periode]) * 100
+        else:
+            pourcentage_periode[periode] = 0
+
+    # Calculer le pourcentage total
+    pourcentage_total = (total_obtenu / total_attendu * 100) if total_attendu > 0 else 0
+
+    return render(request, 'core/situations_eleve.html', {
+        'eleve': eleve,
+        'periodes': periodes,
+        'matieres': matieres,
+        'notations_par_matiere': notations_par_matiere,
+        'total_obtenu': total_obtenu,
+        'total_attendu': total_attendu,
+        'total_periode_obtenu': total_periode_obtenu,
+        'total_periode_attendu': total_periode_attendu,
+        'pourcentage_periode': pourcentage_periode,
+        'pourcentage_total': pourcentage_total,
+    })
+
+from django.http import HttpResponse 
+from openpyxl import Workbook
+from django.shortcuts import get_object_or_404
+from .models import Eleve, Notation, Periode, Matiere
+
+def generer_excel2(request, eleve_id):
+    eleve = get_object_or_404(Eleve, id=eleve_id)
+    periodes = Periode.objects.all()  # Récupérer toutes les périodes
+    matieres = Matiere.objects.filter(classe=eleve.classe)  # Récupérer les matières de la classe de l'élève
+
+    # Créer un classeur et une feuille
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Situation de {eleve.nom}"
+
+    # Ajouter les en-têtes
+    headers = ['Matières']
+    for periode in periodes:
+        headers.append(f"{periode.nom} - Note Obtenue")
+        headers.append(f"{periode.nom} - Note Attendue")
+    headers.append('Total Obtenu')
+    headers.append('Total Attendu')
+    for periode in periodes:
+        headers.append(f"{periode.nom} - Pourcentage")
+    ws.append(headers)
+
+    # Variables pour accumuler les totaux
+    total_obtenu_periode = [0] * len(periodes)
+    total_attendu_periode = [0] * len(periodes)
+
+    # Ajouter les données des notations
+    for matiere in matieres:
+        row = [matiere.nom]  # Commencer la ligne avec le nom de la matière
+        for index, periode in enumerate(periodes):
+            notation = Notation.objects.filter(eleve=eleve, matiere=matiere, periode=periode).first()
+            if notation:
+                row.append(notation.note_obtenue)
+                row.append(notation.note_attendue)
+                total_obtenu_periode[index] += notation.note_obtenue
+                total_attendu_periode[index] += notation.note_attendue
+            else:
+                row.append('N/A')
+                row.append('N/A')
+        ws.append(row)
+
+    # Ajouter la ligne de totaux
+    total_row = ['Total']
+    for total_obtenu, total_attendu in zip(total_obtenu_periode, total_attendu_periode):
+        total_row.append(total_obtenu)
+        total_row.append(total_attendu)
+    ws.append(total_row)
+
+    # Calculer et ajouter les pourcentages
+    pourcentage_row = ['Pourcentage']
+    for total_obtenu, total_attendu in zip(total_obtenu_periode, total_attendu_periode):
+        if total_attendu > 0:
+            pourcentage = (total_obtenu / total_attendu) * 100
+        else:
+            pourcentage = 0
+        pourcentage_row.append(f"{pourcentage:.2f}%")
+    ws.append(pourcentage_row)
+
+    # Créer la réponse HTTP
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="{eleve.nom}_situation.xlsx"'
+
+    # Sauvegarder le classeur dans la réponse
+    wb.save(response)
     
     return response

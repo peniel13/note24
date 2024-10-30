@@ -16,5 +16,8 @@ urlpatterns = [
     path('eleves/<int:eleve_id>/', views.details_eleve, name='details_eleve'),
     path('eleves/<int:eleve_id>/periode/<int:periode_id>/', views.details_periode, name='details_periode'),
     path('matiere/<int:matiere_id>/', views.details_matiere, name='details_matiere'),
-    path('periode/<int:periode_id>/excel/', views.generer_excel, name='generer_excel')
+    path('periode/<int:periode_id>/excel/', views.generer_excel, name='generer_excel'),
+    path('eleve/<int:eleve_id>/generer_excel2/', views.generer_excel2, name='generer_excel2'),
+    path('eleve/<int:eleve_id>/', views.situations_eleve, name='situations_eleve'),
+    
 ]

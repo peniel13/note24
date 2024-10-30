@@ -30,6 +30,7 @@
 
     <p>Total des Notes Attenues: {{ total_attendu }}</p>
     <p>Total des Notes Obtenues: {{ total_obtenu }}</p>
+    <p><strong>Pourcentage Obtenu: {{ pourcentage|floatformat:2 }}%</strong></p>
 
     <a href="{% url 'details_eleve' eleve.id %}">Retour à l'élève</a>
     <a href="{% url 'generer_excel' periode.id %}" class="btn btn-primary">Télécharger le rapport Excel</a>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Situation de l'Élève</title>
+</head>
+<body>
+    <h1>Classe : {{ eleve.classe }}</h1>
+    <h2>Élève : {{ eleve.nom }} {{ eleve.prenom }}</h2>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Matières</th>
+                {% for periode in periodes %}
+                    <th>{{ periode.nom }}</th>
+                {% endfor %}
+                <th>Total Obtenu</th>
+                <th>Total Attendu</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for matiere in matieres %}
+                <tr>
+                    <td>{{ matiere.nom }}</td>
+                    {% for periode in periodes %}
+                        <td>
+                            {% with notation=notations_par_matiere|get_item:matiere|get_item:periode %}
+                                {% if notation %}
+                                    {{ notation.note_obtenue }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    {% endfor %}
+                    <td>{{ notations_par_matiere|get_item:matiere|sum_by_key:"note_obtenue" }}</td>
+                    <td>{{ notations_par_matiere|get_item:matiere|sum_by_key:"note_attendue" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
